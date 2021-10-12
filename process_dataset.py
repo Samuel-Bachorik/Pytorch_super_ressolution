@@ -5,6 +5,8 @@ import numpy
 import math
 import os
 from main import ImagesLoader
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 class Process_dataset:
     def __init__(self,path, height,width,aug_count):
         self.height = height
@@ -13,7 +15,7 @@ class Process_dataset:
         self.aug_count = aug_count
         self.training_images = []
         self.training_labels = []
-        self.path =  ("C:/Users/Samuel/PycharmProjects/Super_ressolution/dataset2")
+        self.path =  ("C:/Users/samue/PycharmProjects/reinforcement_learning_env/dataset2")
         Loader = ImagesLoader(self.path, 128,128)
         self.images,self.labels = Loader.load_images()
         #(6, 3, 128, 128)
@@ -50,14 +52,45 @@ class Process_dataset:
             self.training_labels.append(aug_labels)
 
 
-    def get_batch(self,images):
+    def get_training_batch(self,batch_size):
+        return self.get_batch(self.training_images,32)
 
-        group_idx = numpy.random.randint(len(images))
-        image_idx = numpy.random.randint(len(images[group_idx]))
+    def get_batch(self,images,batch_size):
+        result_x = torch.zeros((batch_size, 3, 128, 128)).float()
+        result_y = torch.zeros((batch_size, 3, 384, 384)).float()
+
+        with ThreadPoolExecutor(max_workers=batch_size) as executor:
+            results = [None] * batch_size
+            for x in range(batch_size):
+                results[x] = executor.submit(self.process_batch,self.training_images,self.training_labels)
+
+            counter = 0
+            for f in concurrent.futures.as_completed(results):
+                result_x[counter], result_y[counter] = f.result()[0], f.result()[1]
+                counter += 1
+
+        return result_x, result_y
 
 
-    def process_batch(self):
-        pass
+
+    def process_batch(self,images,labels):
+        group_idx = numpy.random.randint(len(self.training_images))
+        image_idx = numpy.random.randint(len(self.training_images[group_idx]))
+
+
+        image_np = numpy.array(images[group_idx][image_idx]) / 256.0
+        label_np = numpy.array(labels[group_idx][image_idx])/256.0
+
+        # if self._rnd(0, 1) > 0.1:
+
+        image_np, mask_np = self._augmentation_flip(image_np, label_np)
+
+
+        result_x = torch.from_numpy(numpy.flip(image_np,axis=0).copy())
+        result_y = torch.from_numpy(numpy.flip(mask_np,axis=0).copy())
+
+        return result_x, result_y
+
 
     def _augmentation_flip(self, image_np,label_np):
         if self._rnd(0, 1) < 0.5:
@@ -67,10 +100,12 @@ class Process_dataset:
             aug_img = numpy.flip(image_np, 2)
             aug_label = numpy.flip(label_np, 2)
 
+        return aug_img,aug_label
+
 
 
     def _rnd(self, min_value, max_value):
         return (max_value - min_value) * numpy.random.rand() + min_value
 
-path  =("C:/Users/Samuel/PycharmProjects/Super_ressolution/dataset2")
+path  =("C:/Users/samue/PycharmProjects/reinforcement_learning_env/dataset2")
 Process_dataset(path,128,128,10)
