@@ -1,24 +1,42 @@
-from process_dataset import Process_dataset
+from process_dataset_2 import Process_dataset
+from Model2 import Super_ress_model
+import numpy
+from PIL import Image
+import torch
+import os
+import time
+from datetime import datetime
 
-
-path =  ("C:/Users/samue/PycharmProjects/reinforcement_learning_env/dataset2")
+path =  ("C:/Users/Samuel/PycharmProjects/Super_ressolution/dataset2")
 loader = Process_dataset(path,128,128,3)
 
-x,y = loader.get_training_batch(32)
+model = Super_ress_model()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
-print(x.shape)
-print(y.shape)
-import numpy
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
-from PIL import Image
+for i in range(100):
+    x, y = loader.get_training_batch(32)
+    x = x.to(model.device)
+    y = y.to(model.device)
+    y_pred= model.forward(x)
 
-z = numpy.array(y)
+    print(y.shape)
+    print(y_pred.shape)
+    loss = ((y-y_pred)**2).mean()
+    print(loss)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-z = z*256.0
-z = z[3]
-z = z.astype(numpy.uint8)
-print(z.shape)
-z = numpy.swapaxes(z,0,2)
 
-image = Image.fromarray(z)
-image.show()
+
+
+"""im = y[9]
+im = im.detach().to("cpu").numpy()
+im = numpy.moveaxis(im, 0, 2)
+img = (im*255).astype(numpy.uint8)
+imgg = Image.fromarray(img)
+imgg.show()"""
+
