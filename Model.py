@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class Super_ress_model(torch.nn.Module):
-    def __init__(self, input_shape= (3, 256, 352), output_shape= (2, 256, 352)):
+    def __init__(self, input_shape= (3, 128, 128), output_shape= (3, 384, 384)):
         super(Super_ress_model, self).__init__()
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,7 +17,7 @@ class Super_ress_model(torch.nn.Module):
         self.layers_2 = [
             self.conv_layer(128, 128, 3,1,1),
             self.conv_layer(128,64, 3,1,1),
-            self.conv_layer(64, 3, 3,1,1),
+            self.conv_layer(64, output_shape[0], 3,1,1),
         ]
 
         for i in range(len(self.layers_2)):
