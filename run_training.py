@@ -7,7 +7,7 @@ import os
 import time
 from datetime import datetime
 
-path =  ("C:/Users/Samuel/PycharmProjects/Super_ressolution/dataset2")
+path =  ("C:/Users/samue/PycharmProjects/reinforcement_learning_env/dataset2")
 loader = Process_dataset(path,128,128,3)
 
 model = Super_ress_model()
@@ -17,13 +17,11 @@ model.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
 for i in range(100):
-    x, y = loader.get_training_batch(32)
+    x, y = loader.get_training_batch(4)
     x = x.to(model.device)
     y = y.to(model.device)
     y_pred= model.forward(x)
 
-    print(y.shape)
-    print(y_pred.shape)
     loss = ((y-y_pred)**2).mean()
     print(loss)
     optimizer.zero_grad()
@@ -39,4 +37,3 @@ im = numpy.moveaxis(im, 0, 2)
 img = (im*255).astype(numpy.uint8)
 imgg = Image.fromarray(img)
 imgg.show()"""
-
