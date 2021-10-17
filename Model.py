@@ -8,16 +8,16 @@ class Super_ress_model(torch.nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.layers1 = [
-            self.conv_layer(input_shape[0], 32, 2),
-            self.conv_layer(32, 64, 1),
-            self.conv_layer(64, 128, 2),
+            self.conv_layer(input_shape[0], 32, 7,1,3),
+            self.conv_layer(32, 64, 3,1,1),
+            self.conv_layer(64, 128, 3,1,1),
         ]
         self.upsample = torch.nn.Upsample(size=None, scale_factor=3, mode='nearest', align_corners=None)
 
         self.layers2 = [
-            self.conv_layer(128, 128, 2),
-            self.conv_layer(128,128, 1),
-            self.conv_layer(128, 128, 2),
+            self.conv_layer(128, 128, 3,1,1),
+            self.conv_layer(128,128, 3,1,1),
+            self.conv_layer(128, 3, 3,1,1),
         ]
 
         self.model_layers1 = nn.Sequential(*self.layers1)
@@ -26,6 +26,8 @@ class Super_ress_model(torch.nn.Module):
         self.model_layers2 = nn.Sequential(*self.layers2)
         self.model_layers2.to(self.device)
 
+        print(self.model_layers2)
+        print(self.model_layers1)
 
 
     def forward(self,x):
@@ -36,9 +38,9 @@ class Super_ress_model(torch.nn.Module):
         return layers2
 
 
-    def conv_layer(self, inputs, outputs, stride):
+    def conv_layer(self, inputs, outputs,kernel, stride,padding):
         return nn.Sequential(
-            nn.Conv2d(inputs, outputs, kernel_size=7, stride=stride, padding=1),
+            nn.Conv2d(inputs, outputs, kernel_size=kernel, stride=stride, padding=padding),
             nn.BatchNorm2d(outputs),
             nn.ReLU(inplace=True))
 
