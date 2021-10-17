@@ -7,22 +7,24 @@ class Super_ress_model(torch.nn.Module):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.layer1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=1)
+        self.layer1 = nn.Conv2d(3, 64, kernel_size=7, stride=1, padding=3)
         self.activation1 = nn.ReLU()
 
-        self.layer2 = nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1)
+        self.layer2 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
         self.activation2 = nn.ReLU()
 
         self.upsample = torch.nn.Upsample(size=None, scale_factor=3, mode='nearest', align_corners=None)
 
-        self.layer3 = nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1)
+        self.layer3 = nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1)
         self.activation3 = nn.ReLU()
 
-        self.layer4 = nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1)
-        self.activation4 = nn.ReLU()
+        self.layer4 = nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1)
+        #self.activation4 = nn.ReLU()
 
 
     def forward(self,x):
+        x_bypass = self.upsample(x)
+
         x = self.layer1(x)
         x = self.activation1(x)
 
@@ -35,9 +37,9 @@ class Super_ress_model(torch.nn.Module):
         x = self.activation3(x)
 
         x = self.layer4(x)
-        x = self.activation4(x)
+        #x = self.activation4(x)
 
-        return x
+        return x + x_bypass
 
 
 
