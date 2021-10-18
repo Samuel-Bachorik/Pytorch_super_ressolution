@@ -30,10 +30,15 @@ class Process_dataset:
         self.training_images.append(images_aug)
         self.training_labels.append(labels_aug)
 
+        self.training_count = len(images)+len(images_aug)
+        print("Training images count - ",self.training_count)
+
 
     def get_training_batch(self,batch_size):
         return self.get_batch(self.training_images,self.training_labels,batch_size)
 
+    def get_training_count(self):
+        return self.training_count
 
     def process_augumentation(self,image,label):
         image_aug = numpy.array((image), dtype=numpy.uint8)
