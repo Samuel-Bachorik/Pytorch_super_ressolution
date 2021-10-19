@@ -8,16 +8,17 @@ class Super_ress_model(torch.nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.layers_1 = [
-            self.conv_layer(input_shape[0], 32, 7,1,3),
-            self.conv_layer(32, 64, 3,1,1),
+            self.conv_layer(input_shape[0], 64, 7,1,3),
             self.conv_layer(64, 128, 3,1,1),
+            self.conv_layer(128, 128, 3,1,1),
         ]
         self.upsample = torch.nn.Upsample(size=None, scale_factor=4, mode='nearest', align_corners=None)
 
         self.layers_2 = [
-            self.conv_layer(128, 64, 3,1,1),
-            self.conv_layer(64,64, 3,1,1),
-            self.conv_layer(64, output_shape[0], 3,1,1),
+            self.conv_layer(128, 32, 1, 1, 0),
+            self.conv_layer(32, 32, 3,1,1),
+            self.conv_layer(32,32, 3,1,1),
+            nn.Conv2d(32, output_shape[0], kernel_size=3, stride=1, padding=1)
         ]
 
         for i in range(len(self.layers_2)):
