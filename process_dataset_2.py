@@ -11,15 +11,15 @@ import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 
 class Process_dataset:
-    def __init__(self,path, height,width,aug_count):
-        self.height = height
-        self.width = width
+    def __init__(self,path, in_ress,out_ress,aug_count):
+        self.in_ress = in_ress
+        self.out_ress = out_ress
         self.path = path
         self.aug_count = aug_count
         self.training_images = []
         self.training_labels = []
         self.path = path
-        Loader = ImagesLoader(self.path, 128, 128)
+        Loader = ImagesLoader(self.path, self.in_ress, self.out_ress)
         images, labels = Loader.load_images()
 
         self.training_images.append(images)
@@ -62,12 +62,13 @@ class Process_dataset:
 
 
     def _auqumentation(self,images,labels):
+        print("Processing augummentation")
         count = len(images[0])
         counter= 0
-        images_aug = numpy.zeros((count * 2, 3, 128, 128), dtype=numpy.uint8)
-        labels_aug = numpy.zeros((count * 2, 3, 384, 384), dtype=numpy.uint8)
+        images_aug = numpy.zeros((count * 2, 3, self.in_ress, self.in_ress), dtype=numpy.uint8)
+        labels_aug = numpy.zeros((count * 2, 3, self.out_ress, self.out_ress), dtype=numpy.uint8)
 
-        with ThreadPoolExecutor(max_workers=count * 2) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
             results = [None] * count * 2
             for x in range(count * 2):
                 results[x] = executor.submit(self.process_augumentation,images[0][counter],labels[0][counter])
@@ -84,8 +85,8 @@ class Process_dataset:
 
 
     def get_batch(self,images,labels,batch_size):
-        result_x = torch.zeros((batch_size, 3, 128, 128)).float()
-        result_y = torch.zeros((batch_size, 3, 384, 384)).float()
+        result_x = torch.zeros((batch_size, 3, self.in_ress, self.in_ress)).float()
+        result_y = torch.zeros((batch_size, 3, self.out_ress, self.out_ress)).float()
 
         with ThreadPoolExecutor(max_workers=batch_size) as executor:
             results = [None] * batch_size
@@ -126,8 +127,8 @@ class Process_dataset:
         return aug_img.copy(), aug_label.copy()
 
     def _augmentation_noise(self, image_np,label_np):
-        brightness = self._rnd(-0.25, 0.25)
-        contrast = self._rnd(0.5, 1.5)
+        brightness = self._rnd(-0.30, 0.25)
+        contrast = self._rnd(0.5, 1.2)
         #noise = 0.05 * (2.0 * numpy.random.rand(3, 384, 384) - 1.0)
 
         #noise_low = numpy.swapaxes(noise, 0, 2)
