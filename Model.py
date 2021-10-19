@@ -12,11 +12,11 @@ class Super_ress_model(torch.nn.Module):
             self.conv_layer(32, 64, 3,1,1),
             self.conv_layer(64, 128, 3,1,1),
         ]
-        self.upsample = torch.nn.Upsample(size=None, scale_factor=3, mode='nearest', align_corners=None)
+        self.upsample = torch.nn.Upsample(size=None, scale_factor=4, mode='nearest', align_corners=None)
 
         self.layers_2 = [
-            self.conv_layer(128, 128, 3,1,1),
-            self.conv_layer(128,64, 3,1,1),
+            self.conv_layer(128, 64, 3,1,1),
+            self.conv_layer(64,64, 3,1,1),
             self.conv_layer(64, output_shape[0], 3,1,1),
         ]
 
